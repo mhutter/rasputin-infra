@@ -1,0 +1,27 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hc-ping
+spec:
+  schedule: '* * * * *'
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: hc-ping
+              image: docker.io/library/busybox:latest
+              command:
+                - /bin/sh
+              args:
+                - -c
+                - '/bin/wget -T 10 -O /dev/null https://hc-ping.com/${TOKEN}'
+              env:
+                - name: TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: hc-token
+                      key: token
+          restartPolicy: OnFailure
